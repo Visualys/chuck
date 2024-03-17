@@ -1,0 +1,21 @@
+class kick extends Chugen{
+    0.18 => float length;
+    2.0 * Math.PI /(second/samp) => float t;
+    0 => float x;
+    1=> float amp;
+    -1 / (length * (second/samp)) => float ampstep;
+    0 => float f;
+    -200 / (length* 1.1 * (second/samp)) => float fstep;
+    fun keyOn(){
+		  0 => x;
+		  1 => amp;
+		  220 => f;
+		  }
+	fun float tick(float in){
+		1 +=> x;
+		ampstep +=> amp;
+		fstep +=> f;
+		if(amp<0) 0 => amp;
+		return amp * Math.sin(f*t*x);
+		}
+	}
