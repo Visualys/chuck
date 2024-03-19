@@ -6,7 +6,7 @@ class kick extends Chugen{
 	-1 / (length * (second/samp)) => float ampstep;
 	0 => float f;
 	-200 / (length* 1.1 * (second/samp)) => float fstep;
-	fun keyOn(){
+	fun void keyOn(){
 		0 => x;
 		1 => amp;
 		220 => f;
