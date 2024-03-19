@@ -1,0 +1,89 @@
+class Adsr2 extends Chugen{
+    0 => float g => float step => float stepB => float slope_medrange;
+    0 => int status;
+    0::samp => dur delay;
+    0 => int dlysamp => int dlycount;
+    .1::second => dur attack => dur decay => dur release;
+    .3 => float sustain;
+    1 => float attackSlope => float decaySlope => float releaseSlope;
+
+	fun @construct() { 
+		cherr <= "construct\n";
+		}
+  
+    fun float tick(float in){
+        if(status==1) { //delay
+            1 +=> dlycount;
+            if(dlycount==dlysamp) {1+=>status; cherr <= "dly done.\n";}
+
+            }
+        if(status==2) { //attack
+            step +=> g;
+            stepB +=> step;
+            if(g>=1) {
+                3 => status; 
+                1 => g;
+                (g - sustain) / (decay / samp) => step;
+                (decaySlope * step) - step => slope_medrange;
+                -2 * slope_medrange / ((decay / samp)-1) => stepB;
+                slope_medrange +=> step;
+                }
+            }
+        if(status==3) {
+            step -=> g;
+            stepB +=> step;
+            if(g<=sustain) {
+                4 => status; 
+                sustain => g;
+                }
+            }
+        if(status==5) {
+            step -=> g;
+            stepB +=> step;
+            if(g<=0) {
+                0 => status; 
+                0 => g;
+                }
+            }    
+        return in * g;
+        }
+    fun void keyOn(){
+        if(delay){ 
+            1 => status;
+            (delay / samp) $ int =>  dlysamp;
+            0 => dlycount;
+            }else{ 
+            2 => status; 
+            }
+        (1-g) / (attack / samp) => step;
+        (attackSlope * step) - step => slope_medrange;
+        -2 * slope_medrange / ((attack / samp)-1) => stepB;
+        slope_medrange +=> step;
+        }
+    fun void keyOff(){
+        5 => status;
+        g / (release / samp) => step;
+        (releaseSlope * step) - step => slope_medrange;
+        -2 * slope_medrange / ((release / samp)-1) => stepB;
+        slope_medrange +=> step;
+        }
+    fun void set( dur dly, dur a, dur d, float s, dur r){
+        if(a<1::samp) 1::samp => a;
+        if(d<2::samp) 2::samp => d;
+        if(s>1) 1 =>s;
+        if(r<1::samp) 1::samp => r;   
+        dly => delay;
+        a =>attack;
+        d =>decay;
+        s =>sustain;
+        r =>release;
+        }
+    fun void setSlopes( float a, float d, float r){
+        if(a<=0) {0.001 => a;}else if(a>=2) {1.999 => a;}
+        if(d<=0) {0.001 => d;}else if(d>=2) {1.999 => d;}
+        if(r<=0) {0.001 => r;}else if(r>=2) {1.999 => r;}
+        a => attackSlope;
+        d => decaySlope;
+        r => releaseSlope;
+        }
+    }
