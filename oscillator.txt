@@ -13,19 +13,21 @@ class osc extends Chugen{
     fun float tick(float in){
         freq[0] +=> x;
         if(x>=sr){ x % sr => x;} 
-        else if(x<0) {sr - (x % sr) =>x;}
+        else if(x<0) {sr + (x % sr) =>x;}
         offset + amp * sin[x $ int] => out[0];
         return out[0];
         }
     }
 
+<<<"starting...">>>;
+
 osc m => blackhole;
 440 => m.offset;
-440 => m.freq[0];
-800 => m.amp;
+.5 => m.freq[0];
+140 => m.amp;
 
 osc s => dac;
 .8 => s.gain;
 //300 => s.freq[0];
 m.out @=> s.freq;
-2::second => now;
+5::second => now;
