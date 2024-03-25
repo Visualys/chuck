@@ -1,0 +1,31 @@
+(second/samp) $ int => int sr;
+
+float sin[sr];
+for(0=>int i; i<sr; i++) {
+    Math.sin(2*pi*i/sr) => sin[i];
+    }
+
+class osc extends Chugen{
+    [440.0] @=> float freq[];
+    0 => float x => float offset;
+    1 => float amp;
+    [.0] @=> float out[];
+    fun float tick(float in){
+        freq[0] +=> x;
+        if(x>=sr){ x % sr => x;} 
+        else if(x<0) {sr - (x % sr) =>x;}
+        offset + amp * sin[x $ int] => out[0];
+        return out[0];
+        }
+    }
+
+osc m => blackhole;
+440 => m.offset;
+440 => m.freq[0];
+800 => m.amp;
+
+osc s => dac;
+.8 => s.gain;
+//300 => s.freq[0];
+m.out @=> s.freq;
+2::second => now;
